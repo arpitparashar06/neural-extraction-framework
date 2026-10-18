@@ -10,6 +10,7 @@ from GSoC25 import models
 class TestLazyModelLoading(unittest.TestCase):
 
     def test_import_does_not_import_heavy_dependencies(self):
+        """Verify importing models does not load Transformers or NLTK."""
         result = subprocess.run(
             [
                 sys.executable,
@@ -28,6 +29,7 @@ class TestLazyModelLoading(unittest.TestCase):
         self.assertEqual(result.stdout.strip().splitlines(), ["False", "False"])
 
     def test_load_models_caches_result(self):
+        """Verify repeated calls reuse the cached tokenizer and model."""
         tokenizer = object()
         model = object()
 
@@ -56,6 +58,7 @@ class TestLazyModelLoading(unittest.TestCase):
             models.load_models.cache_clear()
 
     def test_nltk_resource_check_skips_download_when_available(self):
+        """Verify an available NLTK resource does not trigger a download."""
         mock_nltk = types.ModuleType("nltk")
         mock_nltk.data = Mock()
         mock_nltk.download = Mock()
@@ -67,6 +70,7 @@ class TestLazyModelLoading(unittest.TestCase):
         mock_nltk.download.assert_not_called()
 
     def test_nltk_resource_is_downloaded_when_missing(self):
+        """Verify a missing NLTK resource is downloaded."""
         mock_nltk = types.ModuleType("nltk")
         mock_nltk.data = Mock()
         mock_nltk.data.find.side_effect = LookupError
